@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Cavalli!</title>
+        <style>
+            .container{
+                width: 80%;
+                height: calc(100vh - 300px);
+                margin: 50px auto;
+            }
+            .horse-line{
+                width: 100%;
+                margin: 10px auto;
+                height: 25%;
+                position: relative;
+                
+            }
+            .white-line{
+                width:  calc(90% + 5px);
+                height: 10px;
+                background-color: white;
+                position: absolute;
+                top: calc(50% - 5px);
+                right: calc(5% - 5px);
+            }
+            .horse{
+                width: 80px;
+                height: 80px;
+                position: absolute;
+                top: calc(50% - 40px);
+                left: calc(5% - 40px);
+                transition: all 1.5s ease-in-out;
+                z-index: 1;
+            }
+            .field{
+                background-color: #129263;
+            }
+            .go_button{
+                background-color: chartreuse;
+                color: white;
+                font-size: 2em;
+                width: 300px;
+                height: 50px;
+                margin: 10px calc(50% - 150px);
+                border-radius: 10px;
+                border: 0px;
+            }
+            .horse-step{
+                position: absolute;
+                width: 5px;
+                height: 40px;
+                background-color: white;
+                top: calc(50% - 3px);
+            }
+            .win-overlay{
+                background-color: rgba(30, 30, 30, 0.5);
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                display: none;
+                z-index: 2;
+                
+            }
+            .winner-title{
+                text-align: center;
+                color: white;
+                margin: 50px auto;
+            }
+        </style>
+    </head>
+    <body class="field">
+        <div class="win-overlay" id="win-overlay">
+
+            <h1 class="winner-title" id="winner-title">
+                Blue Wins
+            </h1>
+
+            <input type="button" class="go_button" value="Restart" onclick="window.location.reload()"/>
+                
+
+        </div>
+        <div class="container">
+            <div class="horse-line">
+                <div class="white-line"></div>
+                <img src="resources/blue.png" class="horse"/>
+            </div>
+            
+            <div class="horse-line">
+                <div class="white-line"></div>
+                <img src="resources/red.png" class="horse"/>
+            </div>
+
+            <div class="horse-line">
+                <div class="white-line"></div>
+                <img src="resources/yellow.png" class="horse"/>
+            </div>
+
+            <div class="horse-line">
+                <div class="white-line"></div>
+                <img src="resources/black.png" class="horse"/>
+            </div>
+        </div>
+
+        <input type="button" id="stepHorse" value="Go!" class="go_button"/>
+        
+    </body>
+    <script>
+        var intervalID = 0;
+        var audio = new Audio('resources/song.mp3');
+        audio.play();
+        var horses = document.getElementsByClassName("horse");
+        var deck = new Array(36);
+        var step = 0;
+        var horsesPositions = [0, 0, 0, 0];
+        var horseNames = ["Blue", "Red", "Yellow", "Black"];
+        for(i = 0; i < deck.length; i++){
+            deck[i] = Math.floor(i * 4 / deck.length);
+        }
+        console.log(deck);
+        shuffle(deck);
+
+        var goButton = document.getElementById("stepHorse");
+        goButton.onclick = () => start();
+        renderSteps();
+
+        function start(){
+            goButton.disabled = true;
+            goButton.style.backgroundColor = "grey";
+            update();
+            intervalID = window.setInterval(update, 1700);
+        }
+
+        function update(){
+            stepRandomHorse();
+            winner = checkWin();
+            console.log(winner);
+            if(winner >= 0){
+                displayWinningTitle(winner);
+            }
+        }
+
+        function displayWinningTitle(winner){
+            document.getElementById("winner-title").innerHTML = horseNames[winner] + " Wins!";
+            document.getElementById("win-overlay").style.display = "block";
+            clearInterval(intervalID);
+        }
+
+        function renderSteps(){
+            lines = document.getElementsByClassName("horse-line");
+            for(i = 0; i < lines.length; i++){
+                
+                var line = lines[i];
+
+                for(j = 0; j < 10; j++){
+                    var newStep = document.createElement("div");
+                    line.appendChild(newStep);
+                    newStep.classList.add("horse-step");
+                    newStep.style.left = (j*10 + 5)+ "%";
+                }
+               
+
+            }
+        }
+
+        function extractCard(){
+            var pos = deck[step];
+            step++;
+            return pos;
+        }
+
+        function checkWin(){
+            return horsesPositions.indexOf(9);
+        }
+
+        function stepRandomHorse(){
+            var horse = extractCard();
+            stepHorse(horse);
+        }
+
+        function stepHorse(horseNumber){
+            var currentPosition = horsesPositions[horseNumber];
+            currentPosition++;
+            changePosition(currentPosition, horseNumber);
+        }
+
+        function changePosition(position, horseNumber){
+            let offset = 5 + 10 * position;
+            horsesPositions[horseNumber] = position;
+            horses[horseNumber].style.left = "calc(" + offset + "% - 40px)";
+        }
+
+        function shuffle(array) {
+        let currentIndex = array.length,  randomIndex;
+
+        // While there remain elements to shuffle.
+        while (currentIndex != 0) {
+
+            // Pick a remaining element.
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+        }
+
+        return array;
+        }
+
+    </script>
+</html>
